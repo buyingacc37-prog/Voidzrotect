@@ -312,7 +312,7 @@ titlelbl.ZIndex = 3
 titlelbl.Position = UDim2.new(0, 10, 0, 0)
 titlelbl.Size = UDim2.new(1, -80, 0.6, 0)
 titlelbl.BackgroundTransparency = 1
-titlelbl.Text = "âš¡ Thorium Protecterâš¡"
+titlelbl.Text = "⚡ Thorium Protecter⚡"
 titlelbl.TextColor3 = Color3.fromRGB(240, 230, 255)
 titlelbl.TextSize = 14
 titlelbl.Font = Enum.Font.GothamBold
@@ -551,7 +551,7 @@ local shieldico = Instance.new("TextLabel")
 shieldico.Position = UDim2.new(0.05, 0, 0.5, -15)
 shieldico.Size = UDim2.new(0, 30, 0, 30)
 shieldico.BackgroundTransparency = 1
-shieldico.Text = "ðŸ›¡ï¸"
+shieldico.Text = "🛡️"
 shieldico.TextSize = 17
 shieldico.Font = Enum.Font.GothamBlack
 shieldico.Parent = topsec
@@ -613,3 +613,78 @@ end
 
 local playerRows = {}
 
+local function addPlayerRow(p)
+	if p == lp or playerRows[p.UserId] then return end
+
+	local prow = Instance.new("Frame")
+	prow.LayoutOrder = 1000000 + p.UserId % 100000
+	prow.Size = UDim2.new(1, -4, 0, 60)
+	prow.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	prow.BorderSizePixel = 0
+	prow.Parent = scroll
+	Instance.new("UICorner", prow).CornerRadius = UDim.new(0, 10)
+
+	local avatar = Instance.new("ImageLabel")
+	avatar.Position = UDim2.new(0, 8, 0, 10)
+	avatar.Size = UDim2.new(0, 40, 0, 40)
+	avatar.BackgroundTransparency = 1
+	avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. p.UserId .. "&w=150&h=150"
+	avatar.Parent = prow
+	Instance.new("UICorner", avatar).CornerRadius = UDim.new(1, 0)
+
+	local namelbl = Instance.new("TextLabel")
+	namelbl.Position = UDim2.new(0, 55, 0, 8)
+	namelbl.Size = UDim2.new(1, -130, 0, 20)
+	namelbl.BackgroundTransparency = 1
+	namelbl.Text = p.Name
+	namelbl.TextColor3 = Color3.fromRGB(235, 225, 255)
+	namelbl.TextSize = 12
+	namelbl.Font = Enum.Font.GothamBold
+	namelbl.TextXAlignment = Enum.TextXAlignment.Left
+	namelbl.Parent = prow
+
+	local rolelbl = Instance.new("TextLabel")
+	rolelbl.Position = UDim2.new(0, 55, 0, 28)
+	rolelbl.Size = UDim2.new(1, -130, 0, 16)
+	rolelbl.BackgroundTransparency = 1
+	rolelbl.Text = "Player"
+	rolelbl.TextColor3 = Color3.fromRGB(160, 150, 200)
+	rolelbl.TextSize = 10
+	rolelbl.Font = Enum.Font.Gotham
+	rolelbl.TextXAlignment = Enum.TextXAlignment.Left
+	rolelbl.Parent = prow
+
+	local spambtn = Instance.new("TextButton")
+	spambtn.Position = UDim2.new(1, -70, 0.5, -11)
+	spambtn.Size = UDim2.new(0, 60, 0, 22)
+	spambtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+	spambtn.Text = "⚡SPAM⚡"
+	spambtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	spambtn.TextSize = 12
+	spambtn.Font = Enum.Font.GothamBold
+	spambtn.Parent = prow
+	Instance.new("UICorner", spambtn).CornerRadius = UDim.new(0, 8)
+
+	spambtn.MouseButton1Click:Connect(function()
+		if not core.AdminRemote then return end
+		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "balloon")
+		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "ragdoll")
+		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jumpscare")
+		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "rocket")
+		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jail")
+		punishPlayer(p)
+	end)
+
+	playerRows[p.UserId] = prow
+end
+
+local function removePlayerRow(p)
+	if playerRows[p.UserId] then
+		playerRows[p.UserId]:Destroy()
+		playerRows[p.UserId] = nil
+	end
+end
+
+for _, p in ipairs(plrs:GetPlayers()) do addPlayerRow(p) end
+plrs.PlayerAdded:Connect(addPlayerRow)
+plrs.PlayerRemoving:Connect(removePlayerRow)
