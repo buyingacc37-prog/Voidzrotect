@@ -556,16 +556,7 @@ shieldico.TextSize = 17
 shieldico.Font = Enum.Font.GothamBlack
 shieldico.Parent = topsec
 
-local hubtitle = Instance.new("TextLabel")
-hubtitle.Position = UDim2.new(0.15, 0, 0, 0)
-hubtitle.Size = UDim2.new(0.7, 0, 1, 0)
-hubtitle.BackgroundTransparency = 1
-hubtitle.Text = "DISCORD.GG/CHIRAQHUB"
-hubtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-hubtitle.TextSize = 17
-hubtitle.Font = Enum.Font.GothamBold
-hubtitle.TextXAlignment = Enum.TextXAlignment.Left
-hubtitle.Parent = topsec
+
 
 local statusdot = Instance.new("Frame")
 statusdot.Position = UDim2.new(0.9, -5, 0.5, -5)
@@ -658,7 +649,7 @@ local function addPlayerRow(p)
 	spambtn.Position = UDim2.new(1, -70, 0.5, -11)
 	spambtn.Size = UDim2.new(0, 60, 0, 22)
 	spambtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-	spambtn.Text = "âš¡SPAMâš¡"
+	spambtn.Text = "⚡SPAM⚡"
 	spambtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	spambtn.TextSize = 12
 	spambtn.Font = Enum.Font.GothamBold
