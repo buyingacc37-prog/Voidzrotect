@@ -20,6 +20,7 @@ _G.dumpedandremakedbysaturday = {
 	TpProtector          = false,
 	PlayerPositions      = {},
 	TpProtectorCooldowns = {},
+	SpamTargets          = {},   -- ← Added for SPAM feature
 }
 
 local core = _G.dumpedandremakedbysaturday
@@ -55,6 +56,62 @@ function punishPlayer(p)
 	end
 end
 
+-- ==================== ADDED SPAM FEATURE (put right after punishPlayer) ====================
+
+-- Full spam punish (balloon + ragdoll + jumpscare + jail) - matches your screenshot
+local function spamPunish(p)
+	if not core.AdminRemote then return end
+	if not p or p == lp then return end
+	local char = p.Character
+	if not char then return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local uid = p.UserId
+	if core.LastPunishTime[uid] and tick() - core.LastPunishTime[uid] < 0.4 then return end
+	core.LastPunishTime[uid] = tick()
+
+	hrp.CFrame = CFrame.new(0, 10000, 0)
+
+	fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "balloon")
+	fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "ragdoll")
+	fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jumpscare")
+	fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jail")
+
+	-- extra jumpscare for stronger spam feel
+	task.wait(0.15)
+	fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jumpscare")
+end
+
+-- Continuous spam loop (runs every 0.8 seconds while enabled)
+task.spawn(function()
+	while task.wait(0.8) do
+		for player, enabled in pairs(core.SpamTargets) do
+			if enabled and player and player.Parent then
+				spamPunish(player)
+			else
+				core.SpamTargets[player] = nil
+			end
+		end
+	end
+end)
+
+-- Easy functions to spam the player you are currently playing with
+function SpamTarget(player)
+	if not player or player == lp then return end
+	core.SpamTargets[player] = true
+	print("🔴 SPAM STARTED on " .. player.Name)
+end
+
+function StopSpam(player)
+	if player then
+		core.SpamTargets[player] = false
+		print("⏹️ SPAM STOPPED on " .. player.Name)
+	end
+end
+
+-- ==================== END OF SPAM FEATURE ====================
+
 local function findPlayerInHitbox()
 	local hitbox = core.StealHitbox
 	if not hitbox then return end
@@ -62,7 +119,7 @@ local function findPlayerInHitbox()
 	local size = hitbox.Size
 	local hx, hz = size.X * 0.5, size.Z * 0.5
 	for _, p in ipairs(plrs:GetPlayers()) do
-		if p ~= lp then
+		if p \~= lp then
 			local char = p.Character
 			if char then
 				local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -113,7 +170,7 @@ task.spawn(function()
 						if not myHRP then return end
 						local best, bestDist = nil, math.huge
 						for _, p in ipairs(plrs:GetPlayers()) do
-							if p ~= lp then
+							if p \~= lp then
 								local char = p.Character
 								if char then
 									local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -137,7 +194,7 @@ task.spawn(function()
 	if hookfunction and fireproximityprompt then
 		local old = fireproximityprompt
 		hookfunction(fireproximityprompt, newcclosure(function(prompt, ...)
-			if core.Mode ~= "None" then
+			if core.Mode \~= "None" then
 				local at = (prompt.ActionText or ""):lower()
 				local ot = (prompt.ObjectText  or ""):lower()
 				if at:find("steal") or ot:find("steal") then
@@ -146,7 +203,7 @@ task.spawn(function()
 						local pos = part.Position
 						local best, bestD = nil, math.huge
 						for _, p in ipairs(plrs:GetPlayers()) do
-							if p ~= lp then
+							if p \~= lp then
 								local char = p.Character
 								if char then
 									local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -168,7 +225,7 @@ task.spawn(function()
 	if hookfunction and newcclosure then
 		local oldFS = Instance.FireServer
 		hookfunction(Instance.FireServer, newcclosure(function(self, ...)
-			if core.Mode ~= "None" and core.StealHitbox then
+			if core.Mode \~= "None" and core.StealHitbox then
 				findPlayerInHitbox()
 			end
 			return oldFS(self, ...)
@@ -212,7 +269,7 @@ run.Heartbeat:Connect(function()
 		local cf, size = core.StealHitbox.CFrame, core.StealHitbox.Size
 		local hx, hz = size.X * 0.5, size.Z * 0.5
 		for _, p in ipairs(plrs:GetPlayers()) do
-			if p ~= lp then
+			if p \~= lp then
 				local char = p.Character
 				if char then
 					local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -242,7 +299,7 @@ run.Heartbeat:Connect(function()
 
 	if core.TpProtector and core.AdminRemote then
 		for _, p in ipairs(plrs:GetPlayers()) do
-			if p ~= lp then
+			if p \~= lp then
 				local char = p.Character
 				if char then
 					local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -312,7 +369,7 @@ titlelbl.ZIndex = 3
 titlelbl.Position = UDim2.new(0, 10, 0, 0)
 titlelbl.Size = UDim2.new(1, -80, 0.6, 0)
 titlelbl.BackgroundTransparency = 1
-titlelbl.Text = "âš¡ owned by saturday g âš¡"
+titlelbl.Text = "⚡ owned by saturday g ⚡"
 titlelbl.TextColor3 = Color3.fromRGB(240, 230, 255)
 titlelbl.TextSize = 14
 titlelbl.Font = Enum.Font.GothamBold
@@ -551,12 +608,21 @@ local shieldico = Instance.new("TextLabel")
 shieldico.Position = UDim2.new(0.05, 0, 0.5, -15)
 shieldico.Size = UDim2.new(0, 30, 0, 30)
 shieldico.BackgroundTransparency = 1
-shieldico.Text = "ðŸ›¡ï¸"
+shieldico.Text = "🛡️"
 shieldico.TextSize = 17
 shieldico.Font = Enum.Font.GothamBlack
 shieldico.Parent = topsec
 
-
+local hubtitle = Instance.new("TextLabel")
+hubtitle.Position = UDim2.new(0.15, 0, 0, 0)
+hubtitle.Size = UDim2.new(0.7, 0, 1, 0)
+hubtitle.BackgroundTransparency = 1
+hubtitle.Text = "DISCORD.GG/CHIRAQHUB"
+hubtitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+hubtitle.TextSize = 17
+hubtitle.Font = Enum.Font.GothamBold
+hubtitle.TextXAlignment = Enum.TextXAlignment.Left
+hubtitle.Parent = topsec
 
 local statusdot = Instance.new("Frame")
 statusdot.Position = UDim2.new(0.9, -5, 0.5, -5)
@@ -658,12 +724,8 @@ local function addPlayerRow(p)
 
 	spambtn.MouseButton1Click:Connect(function()
 		if not core.AdminRemote then return end
-		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "balloon")
-		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "ragdoll")
-		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jumpscare")
-		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "rocket")
-		fireAdmin("f888ee6e-c86d-46e1-93d7-0639d6635d42", p, "jail")
-		punishPlayer(p)
+		-- Changed to use continuous spam instead of one-time
+		SpamTarget(p)
 	end)
 
 	playerRows[p.UserId] = prow
@@ -679,3 +741,5 @@ end
 for _, p in ipairs(plrs:GetPlayers()) do addPlayerRow(p) end
 plrs.PlayerAdded:Connect(addPlayerRow)
 plrs.PlayerRemoving:Connect(removePlayerRow)
+
+print("✅ SPAM feature added! Use SpamTarget(player) to spam the one you're playing with.")
